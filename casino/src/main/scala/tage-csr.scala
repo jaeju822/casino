@@ -31,7 +31,7 @@
 package casino
 
 import Chisel._
-import freechips.rocketchip.config.Parameters
+import org.chipsalliance.cde.config.Parameters
 
 
 class CircularShiftRegisterIO(compressed_length: Int, history_length: Int) extends Bundle

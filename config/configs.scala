@@ -7,7 +7,7 @@ package chipyard.config
  
 
 import org.chipsalliance.cde.config.Config
-import freechips.rocketchip.config.Parameters
+import org.chipsalliance.cde.config.Parameters
 import freechips.rocketchip.rocket._
 import freechips.rocketchip.subsystem.RocketTilesKey
 import freechips.rocketchip.tile.{BuildCore, FPUParams, XLen}

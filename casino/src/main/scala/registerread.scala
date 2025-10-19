@@ -17,7 +17,7 @@
 package casino
 
 import Chisel._
-import freechips.rocketchip.config.Parameters
+import org.chipsalliance.cde.config.Parameters
 
 class RegisterReadIO(
    issue_width: Int,
