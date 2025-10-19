@@ -3,13 +3,13 @@
 // All Rights Reserved. See LICENSE for license details.
 //------------------------------------------------------------------------------
 
-package casino
+package chipyard
 
 import Chisel._
-import org.chipsalliance.cde.config.{Config, Parameters}
+import org.chipsalliance.cde.config.Config
 import freechips.rocketchip.subsystem.{WithNBigCores, WithoutTLMonitors}
 import freechips.rocketchip.system.BaseConfig
-
+import chipyard.config.{DefaultCasinoConfig, WithMegaCasinos, WithMediumCasinos, WithSmallCasinos}
 // scalastyle:off
 
 class CASINOConfig extends Config(new DefaultCasinoConfig ++ new WithNBigCores(1) ++ new WithoutTLMonitors ++ new BaseConfig)
