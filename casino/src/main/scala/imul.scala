@@ -6,7 +6,7 @@
 package casino
 import Chisel._
 
-import rocket.ALU._
+import freechips.rocketchip.rocket.ALU._
 // TODO can repurpose the FN_* ctrl signals,
 // as we don't overlap with the ALU
 

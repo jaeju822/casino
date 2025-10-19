@@ -6,9 +6,9 @@ package casino
 {
 
 import Chisel._
-import rocket._
-import tile._
-import config.{Parameters, Field}
+import freechips.rocketchip.rocket._
+import freechips.rocketchip.tile._
+import freechips.rocketchip.config.{Field, Parameters}
 
 case object CasinoKey extends Field[CasinoCoreParams]
 
@@ -34,7 +34,7 @@ case class CasinoCoreParams(
    gskew: Option[GSkewParameters] = None
 )
 
-trait HasCasinoCoreParameters extends tile.HasCoreParameters
+trait HasCasinoCoreParameters extends freechips.rocketchip.tile.HasCoreParameters
 {
    // HACK this is a bit hacky since CasinoParams can't extend RocketParams.
    val rocketParams: RocketCoreParams = tileParams.core.asInstanceOf[RocketCoreParams]
@@ -99,7 +99,7 @@ trait HasCasinoCoreParameters extends tile.HasCoreParameters
    // Branch Prediction
 
    val enableBTB = tileParams.btb.isDefined
-   val btbParams: rocket.BTBParams = tileParams.btb.get
+   val btbParams: freechips.rocketchip.rocket.BTBParams = tileParams.btb.get
 
    val enableBTBContainsBranches = casinoParams.enableBTBContainsBranches 
 

@@ -25,9 +25,9 @@ package casino
 {
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import uncore.constants.MemoryOpConstants._
+import freechips.rocketchip.rocket.constants.MemoryOpConstants._
 
 
 // Track Inflight Memory Requests
@@ -139,7 +139,7 @@ class DCacheResp(implicit p: Parameters) extends CasinoBundle()(p)
    val data         = Bits(width = coreDataBits)
    val data_subword = Bits(width = coreDataBits)
    val uop          = new MicroOp
-   val typ          = Bits(width = rocket.MT_SZ)
+   val typ          = Bits(width = freechips.rocketchip.rocket.MT_SZ)
 }
 
 
@@ -186,7 +186,7 @@ class DCacheShim(implicit p: Parameters) extends CasinoModule()(p)
    val io = new Bundle
    {
       val core = (new DCMemPortIO()).flip
-      val dmem = new rocket.HellaCacheIO
+      val dmem = new freechips.rocketchip.rocket.HellaCacheIO
    }
 
    // we are going to ignore store acks (for now at least), so filter them out and only listen to load acks

@@ -10,9 +10,9 @@
 package casino
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import util.Str
+import freechips.rocketchip.util.Str
 
 class FetchBundle(implicit p: Parameters) extends CasinoBundle()(p)
 {
@@ -36,7 +36,7 @@ class FetchUnit(fetch_width: Int)(implicit p: Parameters) extends CasinoModule()
 {
    val io = new CasinoBundle()(p)
    {
-      val imem              = new rocket.FrontendIO
+      val imem              = new freechips.rocketchip.rocket.FrontendIO
       val br_unit           = new BranchUnitResp().asInput
 
       val tsc_reg           = UInt(INPUT, xLen)
@@ -164,7 +164,7 @@ class FetchUnit(fetch_width: Int)(implicit p: Parameters) extends CasinoModule()
    // Update the BHT in the BP2 stage.
    // Also update the BHT in the Exe stage IF and only if the branch is a misprediction.
    // TODO move this into the bpd_pipeline
-   val bp2_bht_update = Wire(Valid(new rocket.BHTUpdate()).asOutput)
+   val bp2_bht_update = Wire(Valid(new freechips.rocketchip.rocket.BHTUpdate()).asOutput)
    bp2_bht_update.valid           := io.imem.resp.valid && io.bp2_br_seen && !if_stalled && !br_unit.take_pc
    bp2_bht_update.bits.prediction := io.imem.resp.bits.btb
    bp2_bht_update.bits.pc         := io.imem.resp.bits.pc

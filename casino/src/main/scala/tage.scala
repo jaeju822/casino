@@ -45,9 +45,9 @@
 package casino
 
 import Chisel._
-import config.{Parameters, Field}
+import freechips.rocketchip.config.{Field, Parameters}
 
-import util.Str
+import freechips.rocketchip.util.Str
 
 case class TageParameters(
    enabled: Boolean = true,
@@ -310,7 +310,7 @@ class TageBrPredictor(
    //-------------------------------------------------------------
    // Track ubit degrade flush timer.
 
-   val degrade_counter = util.WideCounter(20, commit.valid && commit.bits.ctrl.executed.reduce(_|_))
+   val degrade_counter = freechips.rocketchip.util.WideCounter(20, commit.valid && commit.bits.ctrl.executed.reduce(_|_))
    val do_degrade = degrade_counter === UInt(1<<19)
    when (do_degrade)
    {
