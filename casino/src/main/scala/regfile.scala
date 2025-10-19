@@ -15,7 +15,7 @@ package casino
 {
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
 class RegisterFileReadPortIO(addr_width: Int, data_width: Int)(implicit p: Parameters) extends CasinoBundle()(p)
 {

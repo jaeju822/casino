@@ -28,16 +28,16 @@
 package casino
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import rocket.Instructions._
-import util.Str
+import freechips.rocketchip.rocket.Instructions._
+import freechips.rocketchip.util.Str
 
 
-abstract class CasinoModule(implicit p: Parameters) extends tile.CoreModule()(p)
+abstract class CasinoModule(implicit p: Parameters) extends freechips.rocketchip.tile.CoreModule()(p)
   with HasCasinoCoreParameters
 
-class CasinoBundle(implicit val p: Parameters) extends util.ParameterizedBundle()(p)
+class CasinoBundle(implicit val p: Parameters) extends freechips.rocketchip.util.ParameterizedBundle()(p)
   with HasCasinoCoreParameters
 
 //-------------------------------------------------------------
@@ -45,8 +45,8 @@ class CasinoBundle(implicit val p: Parameters) extends util.ParameterizedBundle(
 //-------------------------------------------------------------
 
 
-class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) extends CasinoModule()(p)
-   with tile.HasCoreIO
+class CasinoCore(implicit p: Parameters, edge: freechips.rocketchip.tilelink.TLEdgeOut) extends CasinoModule()(p)
+   with freechips.rocketchip.tile.HasCoreIO
 {
    //**********************************
    // construct all of the modules
@@ -79,7 +79,7 @@ class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) exten
                                  exe_units.map(_.num_rf_read_ports),
                                  exe_units.num_total_bypass_ports,
                                  register_width))
-   val csr              = Module(new rocket.CSRFile())
+   val csr              = Module(new freechips.rocketchip.rocket.CSRFile())
    val dc_shim          = Module(new DCacheShim())
    val lsu              = Module(new LoadStoreUnit(DECODE_WIDTH))
    val rob              = Module(new Rob(
@@ -563,7 +563,7 @@ class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) exten
    val wb_wdata = exe_units(0).io.resp(0).bits.data
 
    csr.io.rw.addr  := exe_units(0).io.resp(0).bits.uop.csr_addr
-   csr.io.rw.cmd   := Mux(exe_units(0).io.resp(0).valid, csr_rw_cmd, rocket.CSR.N)
+   csr.io.rw.cmd   := Mux(exe_units(0).io.resp(0).valid, csr_rw_cmd, freechips.rocketchip.rocket.CSR.N)
    csr.io.rw.wdata :=wb_wdata
 
    // Extra I/O
@@ -584,7 +584,7 @@ class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) exten
    csr.io.interrupts := io.interrupts
 
 // TODO can we add this back in, but handle reset properly and save us the mux above on csr.io.rw.cmd?
-//   assert (!(csr_rw_cmd =/= rocket.CSR.N && !exe_units(0).io.resp(0).valid), "CSRFile is being written to spuriously.")
+//   assert (!(csr_rw_cmd =/= freechips.rocketchip.rocket.CSR.N && !exe_units(0).io.resp(0).valid), "CSRFile is being written to spuriously.")
 
 
    //-------------------------------------------------------------
@@ -690,7 +690,7 @@ class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) exten
             regfile.io.write_ports(w_cnt).addr :=
                exe_units(i).io.resp(j).bits.uop.pdst
             regfile.io.write_ports(w_cnt).data :=
-               Mux(exe_units(i).io.resp(j).bits.uop.ctrl.csr_cmd =/= rocket.CSR.N,
+               Mux(exe_units(i).io.resp(j).bits.uop.ctrl.csr_cmd =/= freechips.rocketchip.rocket.CSR.N,
                   csr.io.rw.rdata,
                   exe_units(i).io.resp(j).bits.data)
          }
@@ -756,7 +756,7 @@ class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) exten
             val unrec_out     = Mux(wb_uop.fp_single, Cat(UInt(0,32), unrec_s), unrec_d)
             if (exe_units(w).uses_csr_wport && (j == 0))
             {
-               rob.io.debug_wb_wdata(cnt) := Mux(wb_uop.ctrl.csr_cmd =/= rocket.CSR.N, csr.io.rw.rdata,
+               rob.io.debug_wb_wdata(cnt) := Mux(wb_uop.ctrl.csr_cmd =/= freechips.rocketchip.rocket.CSR.N, csr.io.rw.rdata,
                                              Mux(wb_uop.fp_val && wb_uop.dst_rtype === RT_FLT, unrec_out,
                                                                                                data))
             }
@@ -769,7 +769,7 @@ class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) exten
          {
             if (exe_units(w).uses_csr_wport && (j == 0))
             {
-               rob.io.debug_wb_wdata(cnt) := Mux(wb_uop.ctrl.csr_cmd =/= rocket.CSR.N, csr.io.rw.rdata, data)
+               rob.io.debug_wb_wdata(cnt) := Mux(wb_uop.ctrl.csr_cmd =/= freechips.rocketchip.rocket.CSR.N, csr.io.rw.rdata, data)
             }
             else
             {
@@ -828,7 +828,7 @@ class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) exten
    //-------------------------------------------------------------
 
    // detect pipeline freezes and throw error
-   val idle_cycles = util.WideCounter(32)
+   val idle_cycles = freechips.rocketchip.util.WideCounter(32)
    when (rob.io.commit.valids.toBits.orR || reset.toBool) { idle_cycles := UInt(0) }
    assert (!(idle_cycles.value(13)), "Pipeline has hung.")
 
@@ -847,14 +847,14 @@ class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) exten
 
    // User-level instruction count.
    csr.io.events(2) := PopCount((Range(0,COMMIT_WIDTH)).map{w =>
-      rob.io.commit.valids(w) && (csr.io.status.prv === UInt(rocket.PRV.U))})
+      rob.io.commit.valids(w) && (csr.io.status.prv === UInt(freechips.rocketchip.rocket.PRV.U))})
 
    // L1 cache stats.
    // TODO add back in cache-miss counters.
 //   csr.io.events(3) := io.dmem.acquire // D$ miss
 //   csr.io.events(4) := io.imem.acquire // I$ miss
 
-   csr.io.events(5)  := csr.io.status.prv === UInt(rocket.PRV.U)
+   csr.io.events(5)  := csr.io.status.prv === UInt(freechips.rocketchip.rocket.PRV.U)
 
    // Instruction mixes.
    csr.io.events(6)  := PopCount((Range(0,COMMIT_WIDTH)).map{w =>
@@ -913,8 +913,8 @@ class CasinoCore(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) exten
 
 
    // Count user-level branches (subtract from total to get privilege branch accuracy)
-   csr.io.events(28) := br_unit.brinfo.valid && (csr.io.status.prv === UInt(rocket.PRV.U))
-   csr.io.events(29) := br_unit.brinfo.mispredict && (csr.io.status.prv === UInt(rocket.PRV.U))
+   csr.io.events(28) := br_unit.brinfo.valid && (csr.io.status.prv === UInt(freechips.rocketchip.rocket.PRV.U))
+   csr.io.events(29) := br_unit.brinfo.mispredict && (csr.io.status.prv === UInt(freechips.rocketchip.rocket.PRV.U))
 
    // count change of privilege modes
    csr.io.events(30) := csr.io.status.prv =/= RegNext(csr.io.status.prv)

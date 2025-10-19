@@ -18,7 +18,7 @@ package casino
 {
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
 //*************************************************************
 // IOs
@@ -98,7 +98,7 @@ class Prefetcher(implicit p: Parameters) extends CasinoModule()(p)
    }
 
    // fetch the next cache line
-   request_queue.io.enq.bits.addr := io.core_requests.bits.addr + UInt(1 << p(uncore.tilelink.CacheBlockOffsetBits))
+   request_queue.io.enq.bits.addr := io.core_requests.bits.addr + UInt(1 << p(freechips.rocketchip.tilelink.CacheBlockOffsetBits))
 
 
    // hook up our request to the outside world (notice the interfaces match)

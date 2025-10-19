@@ -12,8 +12,8 @@ package casino
 
 import Chisel._
 
-import rocket.Instructions._
-import rocket._
+import freechips.rocketchip.rocket.Instructions._
+import freechips.rocketchip.rocket._
 
 object IsKilledByBranch
 {
@@ -208,7 +208,7 @@ object DebugIsJALR
    def apply(inst: UInt): Bool =
    {
       // TODO Chisel not sure why this won't compile
-//      val is_jalr = rocket.DecodeLogic(inst, List(Bool(false)),
+//      val is_jalr = freechips.rocketchip.rocket.DecodeLogic(inst, List(Bool(false)),
 //                                       Array(
 //                                       JALR -> Bool(true)))
       inst(6,0) === UInt("b1100111")
@@ -224,7 +224,7 @@ object DebugGetBJImm
    {
       // TODO Chisel not sure why this won't compile
       //val csignals =
-      //rocket.DecodeLogic(inst,
+      //freechips.rocketchip.rocket.DecodeLogic(inst,
       //                    List(Bool(false), Bool(false)),
       //      Array(
       //         BEQ     -> List(Bool(true ), Bool(false)),

@@ -15,9 +15,9 @@ package constants
 {
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import util.Str
+import freechips.rocketchip.util.Str
 
 trait CASINODebugConstants
 {
@@ -300,7 +300,7 @@ trait ScalarOpConstants
       val cs = Wire(new CtrlSignals())
       cs.br_type     := BR_N
       cs.rf_wen      := Bool(false)
-      cs.csr_cmd     := rocket.CSR.N
+      cs.csr_cmd     := freechips.rocketchip.rocket.CSR.N
       cs.is_load     := Bool(false)
       cs.is_sta      := Bool(false)
       cs.is_std      := Bool(false)
@@ -343,8 +343,8 @@ trait RISCVConstants
    def GetUop(inst: UInt): UInt = inst(6,0)
    def GetRd (inst: UInt): UInt = inst(RD_MSB,RD_LSB)
    def GetRs1(inst: UInt): UInt = inst(RS1_MSB,RS1_LSB)
-   def IsCall(inst: UInt): Bool = (inst === rocket.Instructions.JAL ||
-                                  inst === rocket.Instructions.JALR) && GetRd(inst) === RA
+   def IsCall(inst: UInt): Bool = (inst === freechips.rocketchip.rocket.Instructions.JAL ||
+                                  inst === freechips.rocketchip.rocket.Instructions.JALR) && GetRd(inst) === RA
    def IsReturn(inst: UInt): Bool = GetUop(inst) === jalr_opc && GetRd(inst) === X0 && GetRs1(inst) === RA
 
    def ComputeBranchTarget(pc: UInt, inst: UInt, xlen: Int, coreInstBytes: Int): UInt =
@@ -365,8 +365,8 @@ trait ExcCauseConstants
    val MINI_EXCEPTION_MEM_ORDERING = UInt(13)
    // an instruction needs to be replayed (e.g., I$ asks for a replay)
    val MINI_EXCEPTION_REPLAY = UInt(14)
-   require (!rocket.Causes.all.contains(13))
-   require (!rocket.Causes.all.contains(14))
+   require (!freechips.rocketchip.rocket.Causes.all.contains(13))
+   require (!freechips.rocketchip.rocket.Causes.all.contains(14))
 }
 
 }

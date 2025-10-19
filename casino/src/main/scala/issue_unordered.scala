@@ -11,10 +11,10 @@
 package casino
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
 import FUConstants._
-import util.Str
+import freechips.rocketchip.util.Str
 import scala.collection.mutable.ArrayBuffer
 
 class IssueUnitStatic(num_issue_slots: Int, issue_width: Int, num_wakeup_ports: Int)(implicit p: Parameters)

@@ -6,17 +6,11 @@
 package casino
 
 import Chisel._
-import uncore.tilelink._
-import uncore.coherence._
-import uncore.agents._
-import uncore.devices._
-import uncore.converters._
-import coreplex._
-import rocketchip._
-import tile._
-import rocket._
-import casino._
-import config.{Parameters, Config}
+import freechips.rocketchip.config.Config
+import freechips.rocketchip.subsystem.{WithNBigCores, WithoutTLMonitors}
+import freechips.rocketchip.system.BaseConfig
+
+import _root_.casino.{DefaultCasinoConfig, WithMegaCasinos, WithMediumCasinos, WithSmallCasinos}
 
 // scalastyle:off
 

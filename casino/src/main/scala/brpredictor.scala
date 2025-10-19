@@ -31,9 +31,9 @@
 package casino
 
 import Chisel._
-import config.{Parameters, Field}
+import freechips.rocketchip.config.{Field, Parameters}
 
-import util.Str
+import freechips.rocketchip.util.Str
 
 
 // This is the response packet from the branch predictor. The predictor is
@@ -131,7 +131,7 @@ abstract class BrPredictor(fetch_width: Int, val history_length: Int)(implicit p
       // Arrives same cycle as redirecting the front-end -- otherwise, the ghistory would be wrong if it came later!
       val flush = Bool(INPUT)
       // privilege-level (allow predictor to change behavior in different privilege modes).
-      val status_prv = UInt(INPUT, width = rocket.PRV.SZ)
+      val status_prv = UInt(INPUT, width = freechips.rocketchip.rocket.PRV.SZ)
    }
 
    // the (speculative) global history wire (used for accessing the branch predictor state).
@@ -155,7 +155,7 @@ abstract class BrPredictor(fetch_width: Int, val history_length: Int)(implicit p
    // TODO abstract this away so nobody knows which they are using.
    val r_vlh = new VeryLongHistoryRegister(history_length, VLHR_LENGTH)
 
-   val in_usermode = io.status_prv === UInt(rocket.PRV.U)
+   val in_usermode = io.status_prv === UInt(freechips.rocketchip.rocket.PRV.U)
    val disable_bpd = in_usermode && Bool(ENABLE_BPD_UMODE_ONLY)
 
    val ghistory_all =
@@ -528,7 +528,7 @@ class RandomBrPredictor(
    def rand(width: Int) = {
         lfsr = lfsr(lfsr.getWidth-1,1)
         val mod = (1 << width) - 1
-          util.Random(mod, lfsr)
+          freechips.rocketchip.util.Random(mod, lfsr)
    }
 
    io.resp.valid := rand_val

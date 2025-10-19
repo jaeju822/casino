@@ -18,12 +18,12 @@ package casino
 {
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 import scala.collection.mutable.ArrayBuffer
 
 import FUConstants._
-import tile.XLen
-import uncore.constants.MemoryOpConstants._
+import freechips.rocketchip.tile.XLen
+import freechips.rocketchip.rocket.constants.MemoryOpConstants._
 
 class ExeUnitResp(data_width: Int)(implicit p: Parameters) extends CasinoBundle()(p)
 {
@@ -36,7 +36,7 @@ class ExeUnitResp(data_width: Int)(implicit p: Parameters) extends CasinoBundle(
 class FFlagsResp(implicit p: Parameters) extends CasinoBundle()(p)
 {
    val uop = new MicroOp()
-   val flags = Bits(width=tile.FPConstants.FLAGS_SZ)
+   val flags = Bits(width=freechips.rocketchip.tile.FPConstants.FLAGS_SZ)
 }
 
 class ExecutionUnitIO(num_rf_read_ports: Int
@@ -57,10 +57,10 @@ class ExecutionUnitIO(num_rf_read_ports: Int
    val br_unit = new BranchUnitResp().asOutput
    val get_rob_pc = new RobPCRequest().flip
    val get_pred = new GetPredictionInfo
-   val status = new rocket.MStatus().asInput
+   val status = new freechips.rocketchip.rocket.MStatus().asInput
 
    // only used by the fpu unit
-   val fcsr_rm = Bits(INPUT, tile.FPConstants.RM_SZ)
+   val fcsr_rm = Bits(INPUT, freechips.rocketchip.tile.FPConstants.RM_SZ)
 
    // only used by the mem unit
    val lsu_io = new LoadStoreUnitIO(DECODE_WIDTH).flip
@@ -334,7 +334,7 @@ class FDivSqrtExeUnit(implicit p: Parameters)
 class MemExeUnit(implicit p: Parameters) extends ExecutionUnit(num_rf_read_ports = 2,
    num_rf_write_ports = 1,
    num_bypass_stages = 0,
-   data_width = if(p(tile.TileKey).core.fpu.nonEmpty) 65 else p(tile.XLen),
+   data_width = if(p(freechips.rocketchip.tile.TileKey).core.fpu.nonEmpty) 65 else p(freechips.rocketchip.tile.XLen),
    num_variable_write_ports = 1,
    bypassable = false,
    is_mem_unit = true)(p)
@@ -417,13 +417,13 @@ class MemExeUnit(implicit p: Parameters) extends ExecutionUnit(num_rf_read_ports
    {
       //recode FP values
       val typ = io.dmem.resp.bits.typ
-      val load_single = typ === rocket.MT_W || typ === rocket.MT_WU
+      val load_single = typ === freechips.rocketchip.rocket.MT_W || typ === freechips.rocketchip.rocket.MT_WU
       val rec_s = hardfloat.recFNFromFN(8, 24, io.dmem.resp.bits.data)
       val rec_d = hardfloat.recFNFromFN(11, 53, io.dmem.resp.bits.data)
       val fp_load_data_recoded = Mux(load_single, Cat(SInt(-1, 32), rec_s), rec_d)
 
       val typ_f = io.lsu_io.forward_uop.mem_typ
-      val load_single_f = typ_f === rocket.MT_W || typ_f === rocket.MT_WU
+      val load_single_f = typ_f === freechips.rocketchip.rocket.MT_W || typ_f === freechips.rocketchip.rocket.MT_WU
       val rec_s_f = hardfloat.recFNFromFN(8, 24, io.lsu_io.forward_data)
       val rec_d_f = hardfloat.recFNFromFN(11, 53, io.lsu_io.forward_data)
       val fp_load_data_recoded_forwarded = Mux(load_single_f, Cat(SInt(-1,32), rec_s_f), rec_d_f)
@@ -461,7 +461,7 @@ class ALUMemExeUnit(
    extends ExecutionUnit(
       num_rf_read_ports = if (has_fpu) 3 else 2,
       num_rf_write_ports = 2,
-      num_bypass_stages = if (has_fpu || (has_mul && !use_slow_mul)) p(tile.TileKey).core.fpu.get.dfmaLatency else 1,
+      num_bypass_stages = if (has_fpu || (has_mul && !use_slow_mul)) p(freechips.rocketchip.tile.TileKey).core.fpu.get.dfmaLatency else 1,
       data_width = if (fp_mem_support) 65 else 64,
       num_variable_write_ports = 1,
       bypassable = true,
@@ -717,13 +717,13 @@ class ALUMemExeUnit(
       // I'm doing this twice for two different paths (cache path and forwarding path)!
       // Also, this code is duplicated elsewhere - can we refactor this out?
       val typ = io.dmem.resp.bits.typ
-      val load_single = typ === rocket.MT_W || typ === rocket.MT_WU
+      val load_single = typ === freechips.rocketchip.rocket.MT_W || typ === freechips.rocketchip.rocket.MT_WU
       val rec_s = hardfloat.recFNFromFN(8, 24, io.dmem.resp.bits.data)
       val rec_d = hardfloat.recFNFromFN(11, 53, io.dmem.resp.bits.data)
       val fp_load_data_recoded = Mux(load_single, Cat(SInt(-1, 32), rec_s), rec_d)
 
       val typ_f = io.lsu_io.forward_uop.mem_typ
-      val load_single_f = typ_f === rocket.MT_W || typ_f === rocket.MT_WU
+      val load_single_f = typ_f === freechips.rocketchip.rocket.MT_W || typ_f === freechips.rocketchip.rocket.MT_WU
       val rec_s_f = hardfloat.recFNFromFN(8, 24, io.lsu_io.forward_data)
       val rec_d_f = hardfloat.recFNFromFN(11, 53, io.lsu_io.forward_data)
       val fp_load_data_recoded_forwarded = Mux(load_single_f, Cat(SInt(-1,32), rec_s_f), rec_d_f)

@@ -14,25 +14,25 @@
 package casino
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import tile.FPConstants._
+import freechips.rocketchip.tile.FPConstants._
 
 
 class UOPCodeFDivDecoder extends Module
 {
   val io = new Bundle {
     val uopc = Bits(INPUT, UOPC_SZ)
-    val sigs = new tile.FPUCtrlSigs().asOutput
+    val sigs = new freechips.rocketchip.tile.FPUCtrlSigs().asOutput
   }
 
    val N = BitPat("b0")
    val Y = BitPat("b1")
    val X = BitPat("b?")
 
-   val decoder = rocket.DecodeLogic(io.uopc,
+   val decoder = freechips.rocketchip.rocket.DecodeLogic(io.uopc,
       // Note: not all of these signals are used or necessary, but we're
-      // constrained by the need to fit the rocket.FPU units' ctrl signals.
+      // constrained by the need to fit the freechips.rocketchip.rocket.FPU units' ctrl signals.
       //                                                    swap12         div
       //                                                    | swap32       | sqrt
       //                            cmd                     | | single     | | round
@@ -78,7 +78,7 @@ class FDivSqrtUnit(implicit p: Parameters) extends FunctionalUnit(is_pipelined =
    // provide a one-entry queue to store incoming uops while waiting for the fdiv/fsqrt unit to become available.
    val r_buffer_val = Reg(init = Bool(false))
    val r_buffer_req = Reg(new FuncUnitReq(data_width=65))
-   val r_buffer_fin = Reg(new tile.FPInput)
+   val r_buffer_fin = Reg(new freechips.rocketchip.tile.FPInput)
 
    val fdiv_decoder = Module(new UOPCodeFDivDecoder)
    fdiv_decoder.io.uopc := io.req.bits.uop.uopc
@@ -126,7 +126,7 @@ class FDivSqrtUnit(implicit p: Parameters) extends FunctionalUnit(is_pipelined =
 
    val r_divsqrt_val = Reg(init = Bool(false))  // inflight uop?
    val r_divsqrt_killed = Reg(Bool())           // has inflight uop been killed?
-   val r_divsqrt_fin = Reg(new tile.FPInput)
+   val r_divsqrt_fin = Reg(new freechips.rocketchip.tile.FPInput)
    val r_divsqrt_uop = Reg(new MicroOp)
 
    // Need to buffer output until RF writeport is available.

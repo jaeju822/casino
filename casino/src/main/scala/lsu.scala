@@ -47,10 +47,10 @@ package casino
 {
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import util.Str
-import uncore.constants.MemoryOpConstants._
+import freechips.rocketchip.util.Str
+import freechips.rocketchip.rocket.constants.MemoryOpConstants._
 
 class LoadStoreUnitIO(pl_width: Int)(implicit p: Parameters) extends CasinoBundle()(p)
 {
@@ -116,7 +116,7 @@ class LoadStoreUnitIO(pl_width: Int)(implicit p: Parameters) extends CasinoBundl
                                        // retries as well as some load ordering
                                        // failures.
 
-   val ptw = new rocket.TLBPTWIO
+   val ptw = new freechips.rocketchip.rocket.TLBPTWIO
 
    val counters = new Bundle
    {
@@ -134,7 +134,7 @@ class LoadStoreUnitIO(pl_width: Int)(implicit p: Parameters) extends CasinoBundl
 }
 
 
-class LoadStoreUnit(pl_width: Int)(implicit p: Parameters, edge: uncore.tilelink2.TLEdgeOut) extends CasinoModule()(p)
+class LoadStoreUnit(pl_width: Int)(implicit p: Parameters, edge: freechips.rocketchip.tilelink.TLEdgeOut) extends CasinoModule()(p)
 {
    val io = new LoadStoreUnitIO(pl_width)
 
@@ -360,7 +360,7 @@ class LoadStoreUnit(pl_width: Int)(implicit p: Parameters, edge: uncore.tilelink
                      Mux(will_fire_load_retry, laq_addr(laq_retry_idx),
                                                io.exe_resp.bits.addr.toBits))
 
-   val dtlb = Module(new rocket.TLB(nTLBEntries))
+   val dtlb = Module(new freechips.rocketchip.rocket.TLB(nTLBEntries))
 
    io.ptw <> dtlb.io.ptw
    dtlb.io.req.valid := will_fire_load_incoming ||
@@ -383,8 +383,8 @@ class LoadStoreUnit(pl_width: Int)(implicit p: Parameters, edge: uncore.tilelink
                             init=Bool(false))
    val mem_xcpt_cause = Reg(next=(Mux(io.exe_resp.valid &&
                                       io.exe_resp.bits.mxcpt.valid, io.exe_resp.bits.mxcpt.bits,
-                                  Mux(exe_tlb_uop.is_load,         UInt(rocket.Causes.fault_load),
-                                                                   UInt(rocket.Causes.fault_store)))))
+                                  Mux(exe_tlb_uop.is_load,         UInt(freechips.rocketchip.rocket.Causes.fault_load),
+                                                                   UInt(freechips.rocketchip.rocket.Causes.fault_store)))))
 
    assert (!(dtlb.io.req.valid && exe_tlb_uop.is_fence), "Fence is pretending to talk to the TLB")
    assert (!(io.exe_resp.bits.mxcpt.valid && io.exe_resp.valid &&
@@ -1288,10 +1288,10 @@ object GenByteMask
    {
       val mask = Wire(UInt(width = 8))
       mask := MuxCase(UInt(255,8), Array(
-                   (typ === rocket.MT_B || typ === rocket.MT_BU) -> (UInt(1, 8) << addr(2,0)),
-                   (typ === rocket.MT_H || typ === rocket.MT_HU) -> (UInt(3, 8) << (addr(2,1) << UInt(1))),
-                   (typ === rocket.MT_W || typ === rocket.MT_WU) -> Mux(addr(2), UInt(240, 8), UInt(15, 8)),
-                   (typ === rocket.MT_D)                  -> UInt(255, 8)))
+                   (typ === freechips.rocketchip.rocket.MT_B || typ === freechips.rocketchip.rocket.MT_BU) -> (UInt(1, 8) << addr(2,0)),
+                   (typ === freechips.rocketchip.rocket.MT_H || typ === freechips.rocketchip.rocket.MT_HU) -> (UInt(3, 8) << (addr(2,1) << UInt(1))),
+                   (typ === freechips.rocketchip.rocket.MT_W || typ === freechips.rocketchip.rocket.MT_WU) -> Mux(addr(2), UInt(240, 8), UInt(15, 8)),
+                   (typ === freechips.rocketchip.rocket.MT_D)                  -> UInt(255, 8)))
       mask
    }
 }
@@ -1304,12 +1304,12 @@ object LoadDataGenerator
 {
    def apply(data: UInt, mem_type: UInt): UInt =
    {
-     val sext  = (mem_type === rocket.MT_B) || (mem_type === rocket.MT_H) ||
-                 (mem_type === rocket.MT_W) || (mem_type === rocket.MT_D)
-     val word  = (mem_type === rocket.MT_W) || (mem_type === rocket.MT_WU)
-     val half  = (mem_type === rocket.MT_H) || (mem_type === rocket.MT_HU)
-     val byte_ = (mem_type === rocket.MT_B) || (mem_type === rocket.MT_BU)
-     val dword = (mem_type === rocket.MT_D)
+     val sext  = (mem_type === freechips.rocketchip.rocket.MT_B) || (mem_type === freechips.rocketchip.rocket.MT_H) ||
+                 (mem_type === freechips.rocketchip.rocket.MT_W) || (mem_type === freechips.rocketchip.rocket.MT_D)
+     val word  = (mem_type === freechips.rocketchip.rocket.MT_W) || (mem_type === freechips.rocketchip.rocket.MT_WU)
+     val half  = (mem_type === freechips.rocketchip.rocket.MT_H) || (mem_type === freechips.rocketchip.rocket.MT_HU)
+     val byte_ = (mem_type === freechips.rocketchip.rocket.MT_B) || (mem_type === freechips.rocketchip.rocket.MT_BU)
+     val dword = (mem_type === freechips.rocketchip.rocket.MT_D)
 
       val out = Mux (dword, data,
                 Mux (word , Cat(Fill(32, sext & data(31)), data(31, 0)),

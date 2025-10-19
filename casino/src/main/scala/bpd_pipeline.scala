@@ -23,9 +23,9 @@
 package casino
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import util.Str
+import freechips.rocketchip.util.Str
 
 class RedirectRequest(fetch_width: Int)(implicit p: Parameters) extends CasinoBundle()(p)
 {
@@ -47,7 +47,7 @@ class RedirectRequest(fetch_width: Int)(implicit p: Parameters) extends CasinoBu
 class BranchPredictionResp(implicit p: Parameters) extends CasinoBundle()(p)
 {
    val btb_resp_valid = Bool()
-   val btb_resp       = new rocket.BTBResp
+   val btb_resp       = new freechips.rocketchip.rocket.BTBResp
 
    val bpd_resp       = new BpdResp
 
@@ -76,10 +76,10 @@ class BranchPredictionStage(fetch_width: Int)(implicit p: Parameters) extends Ca
    val io = new CasinoBundle()(p)
    {
       val req        = Decoupled(new RedirectRequest(fetch_width))
-      val imem_resp  = Decoupled(new rocket.FrontendResp).flip
-      val btb_resp   = Valid(new rocket.BTBResp).flip
+      val imem_resp  = Decoupled(new freechips.rocketchip.rocket.FrontendResp).flip
+      val btb_resp   = Valid(new freechips.rocketchip.rocket.BTBResp).flip
       val npc        = UInt(INPUT, width = vaddrBitsExtended)
-      val ras_update = Valid(new rocket.RASUpdate)
+      val ras_update = Valid(new freechips.rocketchip.rocket.RASUpdate)
 
       val pred_resp  = new BranchPredictionResp().asOutput
       val predictions= Vec(fetch_width, new BranchPrediction().asOutput)
@@ -87,7 +87,7 @@ class BranchPredictionStage(fetch_width: Int)(implicit p: Parameters) extends Ca
 
       val brob       = new BrobBackendIo(fetch_width)
       val flush      = Bool(INPUT)
-      val status_prv = UInt(INPUT, width = rocket.PRV.SZ)
+      val status_prv = UInt(INPUT, width = freechips.rocketchip.rocket.PRV.SZ)
    }
 
    //-------------------------------------------------------------
@@ -148,7 +148,7 @@ class BranchPredictionStage(fetch_width: Int)(implicit p: Parameters) extends Ca
    br_predictor.io.flush := io.flush
    br_predictor.io.status_prv := io.status_prv
 
-//   val bpd_valid = br_predictor.io.resp.valid && (io.status_prv === UInt(rocket.PRV.U) || !Bool(ENABLE_BPD_UMODE_ONLY))
+//   val bpd_valid = br_predictor.io.resp.valid && (io.status_prv === UInt(freechips.rocketchip.rocket.PRV.U) || !Bool(ENABLE_BPD_UMODE_ONLY))
    val bpd_valid = br_predictor.io.resp.valid
    val bpd_bits = br_predictor.io.resp.bits
 

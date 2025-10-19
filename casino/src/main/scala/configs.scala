@@ -4,17 +4,18 @@
 //------------------------------------------------------------------------------
 
 package casino
+
 import Chisel._
-import config.{Parameters, Config}
-import coreplex._
-import tile._
-import rocket._
+import freechips.rocketchip.config.{Config, Parameters}
+import freechips.rocketchip.rocket._
+import freechips.rocketchip.subsystem._
+import freechips.rocketchip.tile._
 
 
 class DefaultCasinoConfig extends Config((site, here, up) => {
 
    // Top-Level
-   case BuildCore => (p: Parameters, e: uncore.tilelink2.TLEdgeOut) => new CasinoCore()(p, e)
+   case BuildCore => (p: Parameters, e: freechips.rocketchip.tilelink.TLEdgeOut) => new CasinoCore()(p, e)
    case XLen => 64
 
    // Rocket/Core Parameters
@@ -23,7 +24,7 @@ class DefaultCasinoConfig extends Config((site, here, up) => {
       useCompressed = false,
       nPerfCounters = 4,
       nPerfEvents = 31,
-      fpu = Some(tile.FPUParams(sfmaLatency=3, dfmaLatency=3))
+      fpu = Some(freechips.rocketchip.tile.FPUParams(sfmaLatency=3, dfmaLatency=3))
    ))}
 
    // CASINO-specific uarch Parameters
