@@ -9,7 +9,7 @@ package casino
    // Note: (this FPU currently only supports fixed latency ops)
 
 import Chisel._
-import freechips.rocketchip.config.Parameters
+import org.chipsalliance.cde.config.Parameters
 
 import freechips.rocketchip.tile.FPConstants._
 import freechips.rocketchip.tile.FPUCtrlSigs

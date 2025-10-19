@@ -15,7 +15,7 @@ package constants
 {
 
 import Chisel._
-import freechips.rocketchip.config.Parameters
+import org.chipsalliance.cde.config.Parameters
 
 import freechips.rocketchip.util.Str
 

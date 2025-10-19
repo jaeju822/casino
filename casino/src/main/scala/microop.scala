@@ -10,7 +10,7 @@
 package casino
 
 import Chisel._
-import freechips.rocketchip.config.Parameters
+import org.chipsalliance.cde.config.Parameters
 
 class MicroOp(implicit p: Parameters) extends CasinoBundle()(p)
 {
