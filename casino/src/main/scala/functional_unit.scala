@@ -19,11 +19,11 @@ package casino
 {
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import rocket.ALU._
-import util._
-import uncore.constants.MemoryOpConstants._
+import freechips.rocketchip.rocket.ALU._
+import freechips.rocketchip.util._
+import freechips.rocketchip.rocket.constants.MemoryOpConstants._
 
 
 object FUConstants
@@ -70,13 +70,13 @@ class FunctionalUnitIo(num_stages: Int
    val br_unit = new BranchUnitResp().asOutput
 
    // only used by the fpu unit
-   val fcsr_rm = UInt(INPUT, tile.FPConstants.RM_SZ)
+   val fcsr_rm = UInt(INPUT, freechips.rocketchip.tile.FPConstants.RM_SZ)
 
    // only used by branch unit
    // TODO name this, so ROB can also instantiate it
    val get_rob_pc = new RobPCRequest().flip
    val get_pred = new GetPredictionInfo
-   val status = new rocket.MStatus().asInput
+   val status = new freechips.rocketchip.rocket.MStatus().asInput
 }
 
 class GetPredictionInfo(implicit p: Parameters) extends CasinoBundle()(p)
@@ -110,7 +110,7 @@ class FuncUnitResp(data_width: Int)(implicit p: Parameters) extends CasinoBundle
    val data = UInt(width = data_width)
    val fflags = new ValidIO(new FFlagsResp)
    val addr = UInt(width = vaddrBits+1) // only for maddr -> LSU
-   val mxcpt = new ValidIO(UInt(width=rocket.Causes.all.max)) //only for maddr->LSU
+   val mxcpt = new ValidIO(UInt(width=freechips.rocketchip.rocket.Causes.all.max)) //only for maddr->LSU
 
    override def cloneType = new FuncUnitResp(data_width)(p).asInstanceOf[this.type]
 }
@@ -156,8 +156,8 @@ class BranchUnitResp(implicit p: Parameters) extends CasinoBundle()(p)
 
    val brinfo          = new BrResolutionInfo()
    val btb_update_valid= Bool() // TODO turn this into a directed bundle so we can fold this into btb_update?
-   val btb_update      = new rocket.BTBUpdate
-   val bht_update      = Valid(new rocket.BHTUpdate)
+   val btb_update      = new freechips.rocketchip.rocket.BTBUpdate
+   val bht_update      = Valid(new freechips.rocketchip.rocket.BHTUpdate)
    val bpd_update      = Valid(new BpdUpdate)
 
    val xcpt            = Valid(new Exception)
@@ -281,7 +281,7 @@ class ALUUnit(is_branch_unit: Boolean = false, num_stages: Int = 1)(implicit p: 
                   Mux(io.req.bits.uop.ctrl.op2_sel === OP2_FOUR, UInt(4),
                                                                  UInt(0)))))
 
-   val alu = Module(new rocket.ALU())
+   val alu = Module(new freechips.rocketchip.rocket.ALU())
 
    alu.io.in1 := op1_data.toUInt
    alu.io.in2 := op2_data.toUInt
@@ -529,7 +529,7 @@ class ALUUnit(is_branch_unit: Boolean = false, num_stages: Int = 1)(implicit p: 
       // TODO BUG only trip xcpt if taken to bj_addr
       br_unit.xcpt.valid     := bj_addr(1) && io.req.valid && mispredict && !killed
       br_unit.xcpt.bits.uop  := uop
-      br_unit.xcpt.bits.cause:= UInt(rocket.Causes.misaligned_fetch)
+      br_unit.xcpt.bits.cause:= UInt(freechips.rocketchip.rocket.Causes.misaligned_fetch)
       // TODO is there a better way to get this information to the CSR file? maybe use brinfo.target?
       br_unit.xcpt.bits.badvaddr:= bj_addr
 
@@ -607,16 +607,16 @@ class MemAddrCalcUnit(implicit p: Parameters) extends PipelinedFunctionalUnit(nu
    // Handle misaligned exceptions
    val typ = io.req.bits.uop.mem_typ
    val misaligned =
-      (((typ === rocket.MT_H) || (typ === rocket.MT_HU)) && (effective_address(0) =/= UInt(0))) ||
-      (((typ === rocket.MT_W) || (typ === rocket.MT_WU)) && (effective_address(1,0) =/= UInt(0))) ||
-      ((typ ===  rocket.MT_D) && (effective_address(2,0) =/= UInt(0)))
+      (((typ === freechips.rocketchip.rocket.MT_H) || (typ === freechips.rocketchip.rocket.MT_HU)) && (effective_address(0) =/= UInt(0))) ||
+      (((typ === freechips.rocketchip.rocket.MT_W) || (typ === freechips.rocketchip.rocket.MT_WU)) && (effective_address(1,0) =/= UInt(0))) ||
+      ((typ ===  freechips.rocketchip.rocket.MT_D) && (effective_address(2,0) =/= UInt(0)))
 
    val ma_ld = io.req.valid && io.req.bits.uop.uopc === uopLD && misaligned
    val ma_st = io.req.valid && (io.req.bits.uop.uopc === uopSTA || io.req.bits.uop.uopc === uopAMO_AG) && misaligned
 
    io.resp.bits.mxcpt.valid := ma_ld || ma_st
-   io.resp.bits.mxcpt.bits  := Mux(ma_ld, UInt(rocket.Causes.misaligned_load),
-                                          UInt(rocket.Causes.misaligned_store))
+   io.resp.bits.mxcpt.bits  := Mux(ma_ld, UInt(freechips.rocketchip.rocket.Causes.misaligned_load),
+                                          UInt(freechips.rocketchip.rocket.Causes.misaligned_store))
    assert (!(ma_ld && ma_st), "Mutually-exclusive exceptions are firing.")
 }
 
@@ -677,7 +677,7 @@ abstract class UnPipelinedFunctionalUnit(implicit p: Parameters)
 
 class MulDivUnit(implicit p: Parameters) extends UnPipelinedFunctionalUnit()(p)
 {
-   val muldiv = Module(new rocket.MulDiv(mulDivParams, width = xLen))
+   val muldiv = Module(new freechips.rocketchip.rocket.MulDiv(mulDivParams, width = xLen))
 
    // request
    muldiv.io.req.valid    := io.req.valid && !this.do_kill

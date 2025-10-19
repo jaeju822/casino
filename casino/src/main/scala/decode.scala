@@ -7,13 +7,13 @@ package casino
 {
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import rocket.Instructions._
-import rocket.{CSR,Causes}
-import util.uintToBitPat
+import freechips.rocketchip.rocket.Instructions._
+import freechips.rocketchip.rocket.{CSR,Causes}
+import freechips.rocketchip.util.uintToBitPat
 import FUConstants._
-import uncore.constants.MemoryOpConstants._
+import freechips.rocketchip.rocket.constants.MemoryOpConstants._
 
 
 abstract trait DecodeConstants
@@ -56,7 +56,7 @@ class CtrlSigs extends Bundle
    val is_fence        = Bool()
    val is_fencei       = Bool()
    val mem_cmd         = UInt(width = M_SZ)
-   val mem_typ         = UInt(width = rocket.MT_SZ)
+   val mem_typ         = UInt(width = freechips.rocketchip.rocket.MT_SZ)
    val wakeup_delay    = UInt(width = 2)
    val bypassable      = Bool()
    val br_or_jmp       = Bool()
@@ -64,11 +64,11 @@ class CtrlSigs extends Bundle
    val allocate_brtag  = Bool()
    val inst_unique     = Bool()
    val flush_on_commit = Bool()
-   val csr_cmd         = UInt(width = rocket.CSR.SZ)
+   val csr_cmd         = UInt(width = freechips.rocketchip.rocket.CSR.SZ)
    val rocc            = Bool()
 
    def decode(inst: UInt, table: Iterable[(BitPat, List[BitPat])]) = {
-      val decoder = rocket.DecodeLogic(inst, XDecode.decode_default, table)
+      val decoder = freechips.rocketchip.rocket.DecodeLogic(inst, XDecode.decode_default, table)
       val sigs =
          Seq(legal, fp_val, fp_single, uopc, fu_code, dst_type, rs1_type
          , rs2_type, frs3_en, imm_sel, is_load, is_store, is_amo
@@ -340,7 +340,7 @@ class DecodeUnitIo(implicit p: Parameters) extends CasinoBundle()(p)
    val deq = new Bundle { val uop = new MicroOp().asOutput }
 
    // from CSRFile
-   val status = new rocket.MStatus().asInput
+   val status = new freechips.rocketchip.rocket.MStatus().asInput
    val interrupt = Bool(INPUT)
    val interrupt_cause = UInt(INPUT, xLen)
 
@@ -452,7 +452,7 @@ class BranchDecode extends Module
    }
 
    val bpd_csignals =
-      rocket.DecodeLogic(io.inst,
+      freechips.rocketchip.rocket.DecodeLogic(io.inst,
                   List[BitPat](N, N, N, IS_X),
 ////                      //   is br?
 ////                      //   |  is jal?

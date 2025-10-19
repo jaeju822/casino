@@ -10,7 +10,7 @@
 package casino
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
 import scala.collection.mutable.ArrayBuffer
 

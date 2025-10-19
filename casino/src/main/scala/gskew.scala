@@ -23,7 +23,7 @@
 package casino
 
 import Chisel._
-import config.{Parameters, Field}
+import freechips.rocketchip.config.{Field, Parameters}
 
 case class GSkewParameters(
    enabled: Boolean = true,

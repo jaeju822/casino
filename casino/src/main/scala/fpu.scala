@@ -9,12 +9,12 @@ package casino
    // Note: (this FPU currently only supports fixed latency ops)
 
 import Chisel._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
-import tile.FPConstants._
-import tile.FPUCtrlSigs
+import freechips.rocketchip.tile.FPConstants._
+import freechips.rocketchip.tile.FPUCtrlSigs
 
-import util.uintToBitPat
+import freechips.rocketchip.util.uintToBitPat
 
 
 // TODO get rid of this decoder and move into the Decode stage? Or the RRd stage?
@@ -36,7 +36,7 @@ class UOPCodeFPUDecoder extends Module
 
    val table: Array[(BitPat, List[BitPat])] =
       // Note: not all of these signals are used or necessary, but we're
-      // constrained by the need to fit the rocket.FPU units' ctrl signals.
+      // constrained by the need to fit the freechips.rocketchip.rocket.FPU units' ctrl signals.
       //                                                  swap12         div
       //                                                  | swap32       | sqrt
       //                          cmd                     | | single     | | round
@@ -106,7 +106,7 @@ class UOPCodeFPUDecoder extends Module
       BitPat(uopFNMSUB_D) -> List(FCMD_NMSUB,  X,X,Y,Y,Y, N,N,N,N,N,N,Y, N,N,Y,Y)
       )
 
-   val decoder = rocket.DecodeLogic(io.uopc, default, table)
+   val decoder = freechips.rocketchip.rocket.DecodeLogic(io.uopc, default, table)
 
    val s = io.sigs
    val sigs = Seq(s.cmd, s.ldst, s.wen, s.ren1, s.ren2, s.ren3, s.swap12,
@@ -122,7 +122,7 @@ class FpuReq()(implicit p: Parameters) extends CasinoBundle()(p)
    val rs1_data = Bits(width = 65)
    val rs2_data = Bits(width = 65)
    val rs3_data = Bits(width = 65)
-   val fcsr_rm  = Bits(width = tile.FPConstants.RM_SZ)
+   val fcsr_rm  = Bits(width = freechips.rocketchip.tile.FPConstants.RM_SZ)
 }
 
 class FPU(implicit p: Parameters) extends CasinoModule()(p)
@@ -142,7 +142,7 @@ class FPU(implicit p: Parameters) extends CasinoModule()(p)
    val fp_ctrl = fp_decoder.io.sigs
    val fp_rm = Mux(ImmGenRm(io_req.uop.imm_packed) === Bits(7), io_req.fcsr_rm, ImmGenRm(io_req.uop.imm_packed))
 
-   val req = Wire(new tile.FPInput)
+   val req = Wire(new freechips.rocketchip.tile.FPInput)
    req := fp_ctrl
    req.rm := fp_rm
    req.in1 := io_req.rs1_data
@@ -153,36 +153,36 @@ class FPU(implicit p: Parameters) extends CasinoModule()(p)
    req.typ := ImmGenTyp(io_req.uop.imm_packed)
 
 
-   val dfma = Module(new tile.FPUFMAPipe(latency = fpu_latency, expWidth = 11, sigWidth = 53))
+   val dfma = Module(new freechips.rocketchip.tile.FPUFMAPipe(latency = fpu_latency, expWidth = 11, sigWidth = 53))
    dfma.io.in.valid := io.req.valid && fp_ctrl.fma && !fp_ctrl.single
    dfma.io.in.bits := req
 
 
-   val sfma = Module(new tile.FPUFMAPipe(latency = fpu_latency, expWidth = 8, sigWidth = 24))
+   val sfma = Module(new freechips.rocketchip.tile.FPUFMAPipe(latency = fpu_latency, expWidth = 8, sigWidth = 24))
    sfma.io.in.valid := io.req.valid && fp_ctrl.fma && fp_ctrl.single
    sfma.io.in.bits := req
 
 
-   val ifpu = Module(new tile.IntToFP(fpu_latency)) // 3 for rocket
+   val ifpu = Module(new freechips.rocketchip.tile.IntToFP(fpu_latency)) // 3 for rocket
    ifpu.io.in.valid := io.req.valid && fp_ctrl.fromint
    ifpu.io.in.bits := req
    assert (!(io.req.valid && fp_ctrl.fromint && req.in1(64).toBool),
             "IntToFP integer input has 65th high-order bit set!")
 
 
-   val fpiu = Module(new tile.FPToInt)
+   val fpiu = Module(new freechips.rocketchip.tile.FPToInt)
    fpiu.io.in.valid := io.req.valid && (fp_ctrl.toint || fp_ctrl.cmd === FCMD_MINMAX)
    fpiu.io.in.bits := req
    val fpiu_out = Pipe(Reg(next=fpiu.io.in.valid && !fp_ctrl.fastpipe),
                        fpiu.io.out.bits, fpu_latency-1)
 
 
-   val fpiu_result  = Wire(new tile.FPResult)
+   val fpiu_result  = Wire(new freechips.rocketchip.tile.FPResult)
    fpiu_result.data := fpiu_out.bits.toint
    fpiu_result.exc  := fpiu_out.bits.exc
 
 
-   val fpmu = Module(new tile.FPToFP(fpu_latency)) // latency 2 for rocket
+   val fpmu = Module(new freechips.rocketchip.tile.FPToFP(fpu_latency)) // latency 2 for rocket
    fpmu.io.in.valid := io.req.valid && fp_ctrl.fastpipe
    fpmu.io.in.bits := req
    fpmu.io.lt := fpiu.io.out.bits.lt

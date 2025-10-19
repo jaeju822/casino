@@ -13,7 +13,7 @@ package casino
 
 import Chisel._
 import FUConstants._
-import config.Parameters
+import freechips.rocketchip.config.Parameters
 
 class IssueSlotIO(num_wakeup_ports: Int)(implicit p: Parameters) extends CasinoBundle()(p)
 {
